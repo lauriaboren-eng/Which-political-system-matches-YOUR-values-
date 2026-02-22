@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Political System Are You? | Ideology Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d0d0d;
+  --surface: #161616;
+  --border: #2a2a2a;
+  --text: #f0ede6;
+  --muted: #777;
+  --cap: #e8b84b;    /* capitalism - gold */
+  --dem: #4b9ee8;    /* democratic socialism - blue */
+  --soc: #e85c4b;    /* socialism - red */
+  --com: #b84be8;    /* communism - purple */
+  --fas: #4be8a0;    /* fascism - green (inverted for contrast) */
+  --accent: #f0ede6;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grid texture background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 100px;
+}
+
+/* HEADER */
+header {
+  margin-bottom: 56px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 12vw, 96px);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin-bottom: 24px;
+}
+
+h1 .highlight {
+  display: block;
+  background: linear-gradient(135deg, var(--cap) 0%, var(--dem) 33%, var(--soc) 66%, var(--com) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.intro-text {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 520px;
+  font-weight: 300;
+}
+
+/* Ideology legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+  margin-bottom: 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-cap { background: var(--cap); }
+.dot-dem { background: var(--dem); }
+.dot-soc { background: var(--soc); }
+.dot-com { background: var(--com); }
+.dot-fas { background: var(--fas); }
+
+/* Progress */
+.progress-track {
+  height: 2px;
+  background: var(--border);
+  margin-bottom: 48px;
+  position: relative;
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cap), var(--dem), var(--soc), var(--com));
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  width: 0%;
+}
+
+.progress-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* QUESTION */
+.question-card {
+  display: none;
+  animation: slideIn 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+.question-card.active { display: block; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.q-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 72px;
+  line-height: 1;
+  color: var(--border);
+  margin-bottom: -16px;
+  user-select: none;
+}
+
+.q-text {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text);
+  margin-bottom: 32px;
+  border-left: 3px solid var(--text);
+  padding-left: 20px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: start;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--surface);
+  text-align: left;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+.option:hover {
+  border-color: rgba(240,237,230,0.3);
+  background: #1f1f1f;
+}
+
+.option.selected {
+  border-color: rgba(240,237,230,0.6);
+  background: #1f1f1f;
+}
+
+.option-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--muted);
+  background: rgba(255,255,255,0.03);
+  border-right: 1px solid var(--border);
+  align-self: stretch;
+  transition: all 0.2s;
+}
+
+.option.selected .option-letter {
+  background: rgba(240,237,230,0.08);
+  color: var(--text);
+}
+
+.option-text {
+  padding: 16px 20px;
+  font-weight: 300;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--muted);
+}
+
+.btn:hover:not(:disabled) { border-color: var(--text); color: var(--text); }
+.btn:disabled { opacity: 0.2; cursor: default; }
+
+.btn-next {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.btn-next:hover:not(:disabled) { background: rgba(240,237,230,0.85); color: var(--bg); }
+
+/* RESULTS */
+#results {
+  display: none;
+  animation: slideIn 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+.result-banner {
+  margin-bottom: 40px;
+  padding: 40px;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background: repeating-linear-gradient(
+    -45deg,
+    #fff 0, #fff 1px,
+    transparent 0, transparent 50%
+  );
+  background-size: 10px 10px;
+}
+
+.result-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: 0.7;
+  position: relative;
+}
+
+.result-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 10vw, 80px);
+  line-height: 0.95;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.result-tagline {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.6;
+  opacity: 0.85;
+  position: relative;
+  max-width: 520px;
+}
+
+/* Score bars */
+.scores-section {
+  margin-bottom: 40px;
+}
+
+.scores-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 36px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.score-name {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.score-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.score-bar {
+  height: 100%;
+  border-radius: 3px;
+  width: 0%;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+
+.score-pct {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* Comparison grid */
+.comparison {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+
+.comparison-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--border);
+}
+
+.comp-head {
+  padding: 12px 16px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-right: 1px solid var(--border);
+}
+.comp-head:last-child { border-right: none; }
+
+.comp-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.comp-row:last-child { border-bottom: none; }
+
+.comp-cell {
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.5;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+}
+.comp-cell:last-child { border-right: none; }
+.comp-cell.topic {
+  font-weight: 500;
+  color: var(--text);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+/* Share */
+.share-box {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.retake-btn {
+  margin-top: 24px;
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+
+.retake-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* Color classes */
+.c-cap { color: var(--cap); }
+.c-dem { color: var(--dem); }
+.c-soc { color: var(--soc); }
+.c-com { color: var(--com); }
+.c-fas { color: var(--fas); }
+.bg-cap { background: rgba(232,184,75,0.12); border-color: rgba(232,184,75,0.3); }
+.bg-dem { background: rgba(75,158,232,0.12); border-color: rgba(75,158,232,0.3); }
+.bg-soc { background: rgba(232,92,75,0.12); border-color: rgba(232,92,75,0.3); }
+.bg-com { background: rgba(184,75,232,0.12); border-color: rgba(184,75,232,0.3); }
+.bg-fas { background: rgba(75,232,160,0.12); border-color: rgba(75,232,160,0.3); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="eyebrow">Political Ideology Quiz</div>
+    <h1>Which System<br><span class="highlight">Matches You?</span></h1>
+    <p class="intro-text">Answer 10 questions about economics, government, and society. Your answers will be scored across five political systems and we'll tell you which one aligns most with your values.</p>
+    <div class="legend">
+      <div class="legend-item"><div class="dot dot-cap"></div> Capitalism</div>
+      <div class="legend-item"><div class="dot dot-dem"></div> Democratic Socialism</div>
+      <div class="legend-item"><div class="dot dot-soc"></div> Socialism</div>
+      <div class="legend-item"><div class="dot dot-com"></div> Communism</div>
+      <div class="legend-item"><div class="dot dot-fas"></div> Fascism</div>
+    </div>
+  </header>
+
+  <!-- PROGRESS -->
+  <div class="progress-label" id="progressLabel">Question 1 of 10</div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- QUESTIONS -->
+
+  <!-- Q1 -->
+  <div class="question-card active" id="q1">
+    <div class="q-num">01</div>
+    <div class="q-text">Who should own and control the major means of production — factories, land, resources?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,1,'cap')"><span class="option-letter">A</span><span class="option-text">Private individuals and companies — ownership drives innovation</span></button>
+      <button class="option" onclick="pick(this,1,'dem')"><span class="option-letter">B</span><span class="option-text">Mostly private, but key sectors like energy and healthcare should be publicly owned</span></button>
+      <button class="option" onclick="pick(this,1,'soc')"><span class="option-letter">C</span><span class="option-text">Collectively by workers and communities through democratic control</span></button>
+      <button class="option" onclick="pick(this,1,'com')"><span class="option-letter">D</span><span class="option-text">The state, on behalf of all people — private ownership of production causes inequality</span></button>
+      <button class="option" onclick="pick(this,1,'fas')"><span class="option-letter">E</span><span class="option-text">Private ownership is fine, but must serve the national interest — the state directs it</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" disabled>← Back</button>
+      <button class="btn btn-next" onclick="next(1,2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-card" id="q2">
+    <div class="q-num">02</div>
+    <div class="q-text">How should a society's economy be organized?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,2,'cap')"><span class="option-letter">A</span><span class="option-text">Free markets — supply and demand should set prices, wages, and production</span></button>
+      <button class="option" onclick="pick(this,2,'dem')"><span class="option-letter">B</span><span class="option-text">Mixed economy — markets for most goods, state provision for essentials</span></button>
+      <button class="option" onclick="pick(this,2,'soc')"><span class="option-letter">C</span><span class="option-text">Planned cooperatively — communities and workers decide what gets made</span></button>
+      <button class="option" onclick="pick(this,2,'com')"><span class="option-letter">D</span><span class="option-text">Centrally planned by the state to meet everyone's needs equally</span></button>
+      <button class="option" onclick="pick(this,2,'fas')"><span class="option-letter">E</span><span class="option-text">State-guided economy focused on national strength and self-sufficiency</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(2,1)">← Back</button>
+      <button class="btn btn-next" onclick="next(2,3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question-card" id="q3">
+    <div class="q-num">03</div>
+    <div class="q-text">What role should the government play in providing for citizens?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,3,'cap')"><span class="option-letter">A</span><span class="option-text">Minimal — protect property rights and enforce contracts, but let people provide for themselves</span></button>
+      <button class="option" onclick="pick(this,3,'dem')"><span class="option-letter">B</span><span class="option-text">Provide universal healthcare, education, and housing — funded by progressive taxation</span></button>
+      <button class="option" onclick="pick(this,3,'soc')"><span class="option-letter">C</span><span class="option-text">Guarantee everyone's basic needs — food, shelter, work — as a right</span></button>
+      <button class="option" onclick="pick(this,3,'com')"><span class="option-letter">D</span><span class="option-text">Eliminate inequality entirely — distribute resources according to need</span></button>
+      <button class="option" onclick="pick(this,3,'fas')"><span class="option-letter">E</span><span class="option-text">Support citizens who contribute to the nation — prioritize the collective over the individual</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(3,2)">← Back</button>
+      <button class="btn btn-next" onclick="next(3,4)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question-card" id="q4">
+    <div class="q-num">04</div>
+    <div class="q-text">How do you view economic inequality?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,4,'cap')"><span class="option-letter">A</span><span class="option-text">It's natural and even beneficial — inequality reflects different contributions and drives ambition</span></button>
+      <button class="option" onclick="pick(this,4,'dem')"><span class="option-letter">B</span><span class="option-text">It should be reduced through taxes and social programs, but some inequality is acceptable</span></button>
+      <button class="option" onclick="pick(this,4,'soc')"><span class="option-letter">C</span><span class="option-text">It's a major injustice — structural changes are needed to achieve real equality</span></button>
+      <button class="option" onclick="pick(this,4,'com')"><span class="option-letter">D</span><span class="option-text">It's the defining evil of capitalism — must be abolished entirely</span></button>
+      <button class="option" onclick="pick(this,4,'fas')"><span class="option-letter">E</span><span class="option-text">Class conflict weakens the nation — unity under a strong state matters more than equality</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(4,3)">← Back</button>
+      <button class="btn btn-next" onclick="next(4,5)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question-card" id="q5">
+    <div class="q-num">05</div>
+    <div class="q-text">How should political power be structured?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,5,'cap')"><span class="option-letter">A</span><span class="option-text">Liberal democracy — elected representatives, rule of law, protected individual rights</span></button>
+      <button class="option" onclick="pick(this,5,'dem')"><span class="option-letter">B</span><span class="option-text">Stronger democracy — with more economic rights and participatory decision-making</span></button>
+      <button class="option" onclick="pick(this,5,'soc')"><span class="option-letter">C</span><span class="option-text">Power should flow from workers and communities, not just electoral politics</span></button>
+      <button class="option" onclick="pick(this,5,'com')"><span class="option-letter">D</span><span class="option-text">A transitional state led by the working class until true communism — stateless equality — is reached</span></button>
+      <button class="option" onclick="pick(this,5,'fas')"><span class="option-letter">E</span><span class="option-text">A strong, centralized leader who represents the national will and acts decisively</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(5,4)">← Back</button>
+      <button class="btn btn-next" onclick="next(5,6)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="question-card" id="q6">
+    <div class="q-num">06</div>
+    <div class="q-text">What's your view on national identity and borders?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,6,'cap')"><span class="option-letter">A</span><span class="option-text">Open markets and free trade are more important than nationalism — borders slow commerce</span></button>
+      <button class="option" onclick="pick(this,6,'dem')"><span class="option-letter">B</span><span class="option-text">Nations can cooperate internationally while maintaining their own democratic systems</span></button>
+      <button class="option" onclick="pick(this,6,'soc')"><span class="option-letter">C</span><span class="option-text">International worker solidarity matters more than national identity</span></button>
+      <button class="option" onclick="pick(this,6,'com')"><span class="option-letter">D</span><span class="option-text">Workers of all nations share the same struggle — borders divide the working class</span></button>
+      <button class="option" onclick="pick(this,6,'fas')"><span class="option-letter">E</span><span class="option-text">The nation is sacred — a strong national identity and defended borders are essential</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(6,5)">← Back</button>
+      <button class="btn btn-next" onclick="next(6,7)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="question-card" id="q7">
+    <div class="q-num">07</div>
+    <div class="q-text">How do you feel about political opposition and dissent?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,7,'cap')"><span class="option-letter">A</span><span class="option-text">Essential — free speech and political competition are cornerstones of a healthy society</span></button>
+      <button class="option" onclick="pick(this,7,'dem')"><span class="option-letter">B</span><span class="option-text">Vital — robust debate leads to better policy and prevents abuse of power</span></button>
+      <button class="option" onclick="pick(this,7,'soc')"><span class="option-letter">C</span><span class="option-text">Important, though the current system favors those with wealth and power</span></button>
+      <button class="option" onclick="pick(this,7,'com')"><span class="option-letter">D</span><span class="option-text">During revolutionary transition, counter-revolutionary forces must be suppressed for the greater good</span></button>
+      <button class="option" onclick="pick(this,7,'fas')"><span class="option-letter">E</span><span class="option-text">Opposition weakens national unity — loyalty to the state and leader comes first</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(7,6)">← Back</button>
+      <button class="btn btn-next" onclick="next(7,8)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="question-card" id="q8">
+    <div class="q-num">08</div>
+    <div class="q-text">What's the primary purpose of the military?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,8,'cap')"><span class="option-letter">A</span><span class="option-text">Defend the country and protect trade routes and economic interests</span></button>
+      <button class="option" onclick="pick(this,8,'dem')"><span class="option-letter">B</span><span class="option-text">Defend the nation, but its budget should be balanced against social spending</span></button>
+      <button class="option" onclick="pick(this,8,'soc')"><span class="option-letter">C</span><span class="option-text">Defense only — militarism often serves elite interests, not ordinary people</span></button>
+      <button class="option" onclick="pick(this,8,'com')"><span class="option-letter">D</span><span class="option-text">Protect the revolution and the working class from internal and external enemies</span></button>
+      <button class="option" onclick="pick(this,8,'fas')"><span class="option-letter">E</span><span class="option-text">A source of national pride and power — military strength is central to the nation's greatness</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(8,7)">← Back</button>
+      <button class="btn btn-next" onclick="next(8,9)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="question-card" id="q9">
+    <div class="q-num">09</div>
+    <div class="q-text">How should society handle individual freedoms vs. collective needs?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,9,'cap')"><span class="option-letter">A</span><span class="option-text">Individual freedom is paramount — people should be free to live and spend as they choose</span></button>
+      <button class="option" onclick="pick(this,9,'dem')"><span class="option-letter">B</span><span class="option-text">Balance both — strong individual rights alongside robust social protections</span></button>
+      <button class="option" onclick="pick(this,9,'soc')"><span class="option-letter">C</span><span class="option-text">True freedom requires economic security — social needs must come first</span></button>
+      <button class="option" onclick="pick(this,9,'com')"><span class="option-letter">D</span><span class="option-text">Collective ownership and equality create genuine freedom for all, not just the wealthy</span></button>
+      <button class="option" onclick="pick(this,9,'fas')"><span class="option-letter">E</span><span class="option-text">The individual's duty to the nation outweighs personal freedoms</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(9,8)">← Back</button>
+      <button class="btn btn-next" onclick="next(9,10)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="question-card" id="q10">
+    <div class="q-num">10</div>
+    <div class="q-text">What do you believe is the greatest threat to a just society?</div>
+    <div class="options">
+      <button class="option" onclick="pick(this,10,'cap')"><span class="option-letter">A</span><span class="option-text">Government overreach — too much state power crushes freedom and innovation</span></button>
+      <button class="option" onclick="pick(this,10,'dem')"><span class="option-letter">B</span><span class="option-text">Unchecked corporate power and runaway inequality alongside weak social safety nets</span></button>
+      <button class="option" onclick="pick(this,10,'soc')"><span class="option-letter">C</span><span class="option-text">Capitalism itself — it exploits workers and concentrates wealth in few hands</span></button>
+      <button class="option" onclick="pick(this,10,'com')"><span class="option-letter">D</span><span class="option-text">Private ownership of production — the root cause of exploitation and injustice</span></button>
+      <button class="option" onclick="pick(this,10,'fas')"><span class="option-letter">E</span><span class="option-text">Internal division and foreign influence weakening the nation's unity and strength</span></button>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev(10,9)">← Back</button>
+      <button class="btn btn-next" onclick="showResults()">See My Result →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results"></div>
+
+</div>
+
+<script>
+const scores = { cap:0, dem:0, soc:0, com:0, fas:0 };
+const picks = {};
+
+const ideologies = {
+  cap: {
+    name: "Capitalism",
+    tagline: "You believe in markets, private ownership, and individual freedom as the engine of prosperity.",
+    desc: "Your answers align with capitalism — the economic and political system where private individuals own the means of production, markets set prices, and competition drives growth. Modern capitalist democracies vary widely, from laissez-faire free markets to regulated mixed economies.",
+    traits: ["Free markets & private ownership", "Individual liberty over collective control", "Democracy & rule of law", "Competition drives innovation", "Limited government intervention"],
+    colorClass: "c-cap", bgClass: "bg-cap", barColor: "#e8b84b",
+    econ: "Private/Market", gov: "Liberal Democracy", key: "Individual Freedom"
+  },
+  dem: {
+    name: "Democratic Socialism",
+    tagline: "You want the benefits of democracy and markets — but with strong social protections and reduced inequality.",
+    desc: "Your answers align with democratic socialism — a system that combines electoral democracy with extensive social programs, progressive taxation, and public ownership of key industries. Think Scandinavian-style welfare states: capitalist markets, but with universal healthcare, education, and housing as rights.",
+    traits: ["Mixed economy", "Universal public services", "Strong labor rights", "Progressive taxation", "Democratic governance"],
+    colorClass: "c-dem", bgClass: "bg-dem", barColor: "#4b9ee8",
+    econ: "Mixed/Regulated", gov: "Social Democracy", key: "Equality & Rights"
+  },
+  soc: {
+    name: "Socialism",
+    tagline: "You believe workers and communities — not corporations or states — should control economic life.",
+    desc: "Your answers align with socialism — an economic system where the means of production are owned collectively by workers or communities rather than by private capitalists or the state. Socialism emphasizes economic democracy, worker control, and eliminating exploitation, while often retaining political freedoms.",
+    traits: ["Worker/collective ownership", "Economic democracy", "Elimination of exploitation", "Social equality", "Community-based decision making"],
+    colorClass: "c-soc", bgClass: "bg-soc", barColor: "#e85c4b",
+    econ: "Collective Ownership", gov: "Participatory/Democratic", key: "Worker Control"
+  },
+  com: {
+    name: "Communism",
+    tagline: "You see private ownership as the root of all exploitation and want a classless, stateless society.",
+    desc: "Your answers align with communism — the political and economic theory that advocates for collective ownership of all means of production, the abolition of private property, and ultimately a classless, stateless society. In practice, communist states have used strong central governments as a transitional phase.",
+    traits: ["Abolition of private property", "Collective/state ownership", "Classless society as goal", "Central planning", "International worker solidarity"],
+    colorClass: "c-com", bgClass: "bg-com", barColor: "#b84be8",
+    econ: "State/Collective", gov: "Vanguard State → Stateless", key: "Equality & Abolition of Class"
+  },
+  fas: {
+    name: "Fascism",
+    tagline: "You prioritize national unity, strong centralized authority, and the collective power of the state.",
+    desc: "Your answers align with fascism — an authoritarian nationalist ideology that places the state and national identity above individual rights. Fascist economies allow private ownership but heavily direct it toward national goals. Historically, fascism has been associated with suppression of opposition, militarism, and authoritarian leadership.",
+    traits: ["Extreme nationalism", "Authoritarian leadership", "State-directed economy", "Suppression of opposition", "Militarism & national strength"],
+    colorClass: "c-fas", bgClass: "bg-fas", barColor: "#4be8a0",
+    econ: "State-Directed Private", gov: "Authoritarian/Dictatorial", key: "National Unity & Power"
+  }
+};
+
+const names = {
+  cap: "Capitalism",
+  dem: "Democratic Socialism",
+  soc: "Socialism",
+  com: "Communism",
+  fas: "Fascism"
+};
+
+const barColors = {
+  cap: "#e8b84b", dem: "#4b9ee8", soc: "#e85c4b", com: "#b84be8", fas: "#4be8a0"
+};
+
+function pick(btn, qNum, ideology) {
+  const card = document.getElementById('q' + qNum);
+  card.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  btn.classList.add('selected');
+  // Remove old pick score
+  if (picks[qNum]) scores[picks[qNum]]--;
+  picks[qNum] = ideology;
+  scores[ideology]++;
+}
+
+function next(from, to) {
+  document.getElementById('q' + from).classList.remove('active');
+  const card = document.getElementById('q' + to);
+  card.classList.add('active');
+  card.style.animation = 'none';
+  requestAnimationFrame(() => card.style.animation = '');
+  updateProgress(to);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function prev(from, to) {
+  document.getElementById('q' + from).classList.remove('active');
+  document.getElementById('q' + to).classList.add('active');
+  updateProgress(to);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function updateProgress(qNum) {
+  document.getElementById('progressFill').style.width = ((qNum / 10) * 100) + '%';
+  document.getElementById('progressLabel').textContent = `Question ${qNum} of 10`;
+}
+
+function showResults() {
+  // Hide all questions
+  document.querySelectorAll('.question-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Results';
+
+  // Find winner
+  let winner = Object.keys(scores).reduce((a,b) => scores[a] >= scores[b] ? a : b);
+  const w = ideologies[winner];
+  const total = 10;
+
+  // Build results HTML
+  const scoreRows = Object.keys(scores).map(k => {
+    const pct = Math.round((scores[k] / total) * 100);
+    return `
+      <div class="score-row">
+        <div class="score-name ${ideologies[k].colorClass}">${names[k]}</div>
+        <div class="score-track">
+          <div class="score-bar" style="background:${barColors[k]}" data-pct="${pct}"></div>
+        </div>
+        <div class="score-pct">${pct}%</div>
+      </div>`;
+  }).join('');
+
+  const compRows = [
+    ['Property', 'Private ownership', 'Mostly private', 'Worker-owned', 'State/Collective', 'Private + state-directed'],
+    ['Economy', 'Free market', 'Mixed market', 'Cooperative', 'Centrally planned', 'State-commanded'],
+    ['Government', 'Liberal democracy', 'Social democracy', 'Participatory', 'Vanguard state', 'Authoritarian'],
+    ['Inequality', 'Accepted/natural', 'Reduced via tax', 'Structurally eliminated', 'Abolished', 'Subsumed by nationalism'],
+    ['Individual Rights', 'Central', 'Strong + social', 'Economic rights key', 'Collective over individual', 'Subordinate to state'],
+  ].map(row => `
+    <div class="comp-row">
+      <div class="comp-cell topic">${row[0]}</div>
+      <div class="comp-cell">${row[1]}<br><span style="font-size:10px;opacity:0.4">Capitalism</span></div>
+      <div class="comp-cell">${row[2]}<br><span style="font-size:10px;opacity:0.4">Dem. Socialism</span></div>
+    </div>
+    <div class="comp-row">
+      <div class="comp-cell topic"></div>
+      <div class="comp-cell">${row[3]}<br><span style="font-size:10px;opacity:0.4">Socialism</span></div>
+      <div class="comp-cell">${row[4]}<br><span style="font-size:10px;opacity:0.4">Communism</span></div>
+    </div>
+    <div class="comp-row" style="border-bottom:2px solid var(--border)">
+      <div class="comp-cell topic"></div>
+      <div class="comp-cell" style="grid-column:span 2">${row[5]}<br><span style="font-size:10px;opacity:0.4">Fascism</span></div>
+    </div>`
+  ).join('');
+
+  const html = `
+    <div class="result-banner ${w.bgClass}">
+      <div class="result-eyebrow ${w.colorClass}">Your Result</div>
+      <div class="result-title ${w.colorClass}">${w.name}</div>
+      <div class="result-tagline">${w.tagline}</div>
+    </div>
+
+    <div style="margin-bottom:32px; padding:24px; background:var(--surface); border:1px solid var(--border); border-radius:2px; font-size:14px; line-height:1.7; font-weight:300; color:#aaa;">
+      ${w.desc}
+    </div>
+
+    <div class="scores-section">
+      <div class="scores-label">Your Score Breakdown</div>
+      ${scoreRows}
+    </div>
+
+    <div style="margin-bottom:40px;">
+      <div class="scores-label">How the Systems Compare</div>
+      <div class="comparison">
+        <div class="comparison-header">
+          <div class="comp-head">Dimension</div>
+          <div class="comp-head">System A</div>
+          <div class="comp-head">System B</div>
+        </div>
+        ${compRows}
+      </div>
+    </div>
+
+    <div class="share-box">
+      <strong style="color:var(--text);font-size:14px;">Share on Facebook</strong><br>
+      Take a screenshot of your result and post it — or share the quiz link and see what your friends get! It's a great way to start a conversation about politics and values.
+      <br><br>
+      <button class="retake-btn" onclick="retake()">Retake the Quiz</button>
+    </div>`;
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = html;
+  resultsEl.style.display = 'block';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+
+  // Animate score bars
+  setTimeout(() => {
+    resultsEl.querySelectorAll('.score-bar').forEach(bar => {
+      bar.style.width = bar.dataset.pct + '%';
+    });
+  }, 300);
+}
+
+function retake() {
+  // Reset
+  Object.keys(scores).forEach(k => scores[k] = 0);
+  Object.keys(picks).forEach(k => delete picks[k]);
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('q1').classList.add('active');
+  updateProgress(1);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
