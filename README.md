@@ -1,1 +1,1 @@
-So any words are flying around in pulic discourse. It's hard to keep track of important beliefs.  This should help you see where your beliefs might fit. Drop a comment below about what you discovered!
+So many words are flying around in pulic discourse. It's hard to keep track of important beliefs.  This should help you see where your beliefs might fit. Drop a comment below about what you discovered!
